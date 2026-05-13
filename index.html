@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagramma Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f1f5f9; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); width: 100%; max-width: 550px; }
+        h2 { text-align: center; color: #0f172a; margin-bottom: 15px; }
+        textarea { width: 100%; height: 80px; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 14px; resize: none; margin-bottom: 15px; }
+        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; }
+        button:hover { background: #2563eb; }
+        .chart { margin-top: 20px; height: 200px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 30px; position: relative; border-bottom: 2px solid #e2e8f0; }
+        .bar { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 60px; transition: height 0.4s; }
+        .bar-inner { width: 100%; background: linear-gradient(to top, #3b82f6, #60a5fa); border-radius: 6px 6px 0 0; min-height: 4px; position: relative; }
+        .bar-label { position: absolute; bottom: 100%; margin-bottom: 5px; font-weight: bold; color: #0f172a; font-size: 14px; white-space: nowrap; }
+        .bar-name { margin-top: 8px; font-size: 12px; color: #64748b; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>📊 Diagramma Generator</h2>
+        <textarea placeholder="Format: Nomi: Qiymat\nMasalan:\nYanvar: 120\nFevral: 85\nMart: 150"></textarea>
+        <button onclick="generateChart()">🔄 Diagramma Yaratish</button>
+        <div class="chart" id="chart"></div>
+    </div>
+
+    <script>
+        function generateChart() {
+            const input = document.querySelector('textarea').value.trim();
+            const chart = document.getElementById('chart');
+            chart.innerHTML = '';
+            
+            if (!input) return;
+            
+            const lines = input.split('\n').map(l => l.trim()).filter(Boolean);
+            const data = lines.map(l => {
+                const [name, val] = l.split(':').map(s => s.trim());
+                return { name, value: parseFloat(val) || 0 };
+            }).filter(d => d.name && !isNaN(d.value));
+            
+            if (data.length === 0) return alert("To'g'ri formatda yozing: Nomi: Raqam");
+            
+            const maxVal = Math.max(...data.map(d => d.value));
+            
+            data.forEach(d => {
+                const heightPct = (d.value / maxVal) * 100;
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.innerHTML = `
+                    <div class="bar-inner" style="height: 0%">
+                        <span class="bar-label">${d.value}</span>
+                    </div>
+                    <div class="bar-name">${d.name}</div>
+                `;
+                chart.appendChild(bar);
+                setTimeout(() => bar.querySelector('.bar-inner').style.height = heightPct + '%', 50);
+            });
+        }
+    </script>
+</body>
+</html>
